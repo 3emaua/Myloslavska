@@ -22,7 +22,8 @@ TELEGRAM_CHAT_IDS = [
 ]
 
 DEVICE_TYPE = "storage"
-DEVICE_SN = "HAQ1G5H24S"  # Твой актуальный серийник даталоггера
+DEVICE_SN = "UYN9G5N141"
+  # Твой актуальный серийник даталоггера
 
 KYIV = ZoneInfo("Europe/Kyiv")
 STATE_FILE = Path("power_state.json")

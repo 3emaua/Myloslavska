@@ -16,7 +16,8 @@ GROWATT_API = "https://openapi.growatt.com"
 GROWATT_TOKEN = "kh3w9600ko1723x05n6146290m44492l"
 
 # Вставьте сюда токен ВАШЕГО Telegram-бота и ВАШ Chat ID
-TELEGRAM_BOT_TOKEN = "AAGLoZiGVFSRLpayP4H4ifNkEc7ufF879wA"
+TELEGRAM_BOT_TOKEN = "9031052092:AAGLoZiGVFSRLpayP4H4ifNkEc7ufF879wA"
+
 TELEGRAM_CHAT_IDS = [
     "9031052092"
 ]

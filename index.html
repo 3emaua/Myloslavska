@@ -8,9 +8,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg-color: #0b0f19;
-      --card-bg: #141b2d;
-      --card-border: #1e293b;
+      --bg-color: #070913;
+      --card-bg: rgba(20, 27, 45, 0.75);
+      --card-border: rgba(255, 255, 255, 0.07);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --accent-green: #22c55e;
@@ -20,6 +20,9 @@
 
     body {
       background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.05) 0%, transparent 40%);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 16px;
@@ -31,13 +34,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       padding: 0 4px;
     }
     .station-title h1 {
       margin: 0;
       font-size: 22px;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
     .station-title p {
       margin: 2px 0 0 0;
@@ -51,23 +55,37 @@
       font-size: 13px;
       font-weight: 600;
       color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(34, 197, 94, 0.2);
     }
     .online-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background: var(--accent-green);
       border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
     }
 
-    /* Карточка схемы */
+    /* Главная карточка схемы (Glassmorphism) */
     .schema-card {
       background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--card-border);
-      border-radius: 24px;
+      border-radius: 28px;
       padding: 20px;
       margin-bottom: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
       position: relative;
+      overflow: hidden;
     }
 
     .top-metrics {
@@ -77,34 +95,40 @@
       margin-bottom: 16px;
     }
     .metric-badge {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 8px 14px;
-      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 14px;
+      border-radius: 16px;
       text-align: center;
+      flex: 1;
+      max-width: 95px;
     }
-    .metric-badge span { display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 2px; }
-    .metric-badge strong { font-size: 14px; font-weight: 600; }
+    .metric-badge span { display: block; color: var(--text-muted); font-size: 10px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-badge strong { font-size: 13px; font-weight: 700; }
 
-    /* Центральная батарея сверху */
+    /* Центральная капсула батареи */
     .battery-pill {
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      border-radius: 20px;
-      padding: 8px 20px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(20, 27, 45, 0.8));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 22px;
+      padding: 8px 18px;
       text-align: center;
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.1);
+      flex: 1.2;
+      margin: 0 8px;
     }
-    .battery-pill h2 { margin: 0; font-size: 22px; color: var(--accent-green); font-weight: 700; }
-    .battery-pill span { font-size: 11px; color: var(--text-muted); }
+    .battery-pill h2 { margin: 0; font-size: 20px; color: var(--accent-green); font-weight: 800; letter-spacing: -0.5px; }
+    .battery-pill span { font-size: 10px; color: var(--text-muted); }
 
-    /* Графика схемы (SVG) */
+    /* SVG схема */
     .schema-svg-container {
       position: relative;
       width: 100%;
-      height: 130px;
+      height: 125px;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin: 4px 0;
     }
     svg { width: 100%; height: 100%; overflow: visible; }
 
@@ -117,58 +141,62 @@
     }
 
     #battery-level-bar {
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Плашка разряда снизу схемы */
+    /* Плашка разряда/заряда снизу */
     .discharge-pill {
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      border-radius: 16px;
-      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 10px 20px;
       text-align: center;
-      width: 150px;
-      margin: 14px auto 0 auto;
+      width: fit-content;
+      margin: 12px auto 0 auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    .discharge-pill strong { color: var(--accent-green); font-size: 14px; display: block; }
+    .discharge-pill strong { color: var(--accent-green); font-size: 15px; font-weight: 700; display: block; }
     .discharge-pill span { font-size: 11px; color: var(--text-muted); }
 
-    /* Главный статус-баннер */
+    /* Премиальный статус-баннер */
     .status-banner {
-      border-radius: 20px;
-      padding: 16px 20px;
+      border-radius: 24px;
+      padding: 18px 22px;
       text-align: center;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
       gap: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
     }
     .status-banner.offline {
-      background: linear-gradient(135deg, #381305 0%, #691313 100%);
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: linear-gradient(135deg, rgba(69, 10, 10, 0.9) 0%, rgba(30, 9, 9, 0.95) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
     .status-banner.online {
-      background: linear-gradient(135deg, #04382c 0%, #064e3b 100%);
-      border: 1px solid rgba(34, 197, 94, 0.35);
+      background: linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(4, 47, 36, 0.95) 100%);
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
     .status-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 22px;
       flex-shrink: 0;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.15);
     }
-    .status-banner.offline .status-icon { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
-    .status-banner.online .status-icon { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    .status-banner.offline .status-icon { background: rgba(239, 68, 68, 0.25); color: var(--accent-red); }
+    .status-banner.online .status-icon { background: rgba(34, 197, 94, 0.25); color: var(--accent-green); }
     
     .status-text { text-align: left; }
-    .status-text h3 { margin: 0; font-size: 17px; font-weight: 700; }
-    .status-text p { margin: 2px 0 0 0; font-size: 13px; color: #cbd5e1; }
+    .status-text h3 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .status-text p { margin: 3px 0 0 0; font-size: 13px; color: #cbd5e1; }
 
     /* Сетка трех показателей */
     .grid-3 {
@@ -179,21 +207,25 @@
     }
     .stat-card {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 14px 10px;
-      text-align: center;
-    }
-    .stat-card p { margin: 0 0 6px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 500; }
-    .stat-card h4 { margin: 0; font-size: 17px; font-weight: 700; }
-
-    /* Таймлайн графика света */
-    .timeline-card {
-      background: var(--card-bg);
+      backdrop-filter: blur(15px);
       border: 1px solid var(--card-border);
       border-radius: 20px;
-      padding: 18px;
+      padding: 16px 10px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .stat-card p { margin: 0 0 6px 0; font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    .stat-card h4 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+
+    /* Премиальный таймлайн графика света */
+    .timeline-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 20px;
       margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
     .timeline-header {
       display: flex;
@@ -201,35 +233,38 @@
       align-items: center;
       margin-bottom: 14px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
     }
     .timeline-bar {
-      height: 12px;
-      background: #1e293b;
-      border-radius: 6px;
+      height: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 7px;
       overflow: hidden;
       margin-bottom: 10px;
       display: flex;
+      padding: 2px;
     }
-    .timeline-fill-green { background: var(--accent-green); height: 100%; }
-    .timeline-fill-orange { background: var(--accent-orange); height: 100%; }
+    .timeline-fill-green { background: linear-gradient(90deg, #16a34a, #22c55e); height: 100%; border-radius: 5px; }
+    .timeline-fill-orange { background: linear-gradient(90deg, #d97706, #f59e0b); height: 100%; border-radius: 5px; }
     
     .timeline-hours {
       display: flex;
       justify-content: space-between;
       font-size: 10px;
       color: var(--text-muted);
+      font-weight: 500;
     }
     .timeline-legend {
       display: flex;
       gap: 20px;
       justify-content: center;
-      margin-top: 14px;
+      margin-top: 16px;
       font-size: 12px;
       color: var(--text-muted);
     }
-    .legend-item { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
   </style>
 </head>
 <body>
@@ -270,11 +305,11 @@
       <svg viewBox="0 0 360 125" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
           <filter id="glow-orange" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
@@ -285,8 +320,8 @@
         
         <!-- Крестик обрыва сети -->
         <g id="grid-cross-group" transform="translate(105, 50)">
-          <circle cx="0" cy="0" r="12" fill="#ef4444" opacity="0.9" />
-          <text x="0" y="4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">✕</text>
+          <circle cx="0" cy="0" r="13" fill="#ef4444" opacity="0.9" />
+          <text x="0" y="4.5" font-size="13" text-anchor="middle" fill="#fff" font-weight="bold">✕</text>
         </g>
 
         <!-- Линия 2: Инвертор -> Дом (Квартира) -->
@@ -295,30 +330,30 @@
 
         <!-- 1. Иконка ЛЭП (Город) -->
         <g transform="translate(25, 25)">
-          <rect x="0" y="0" width="40" height="50" rx="10" fill="#141b2d" stroke="#334155" stroke-width="1.5" />
+          <rect x="0" y="0" width="40" height="50" rx="12" fill="#141b2d" stroke="#334155" stroke-width="1.5" />
           <text x="20" y="31" font-size="22" text-anchor="middle">🗼</text>
         </g>
 
         <!-- 2. Инвертор Growatt (Центр) -->
         <g transform="translate(145, 17)">
-          <rect x="0" y="0" width="70" height="66" rx="12" fill="#141b2d" stroke="#f59e0b" stroke-width="2.5" />
-          <circle cx="35" cy="30" r="16" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" />
+          <rect x="0" y="0" width="70" height="66" rx="14" fill="#141b2d" stroke="#f59e0b" stroke-width="2.5" />
+          <circle cx="35" cy="30" r="16" fill="#0b0f19" stroke="#f59e0b" stroke-width="1.5" />
           <text x="35" y="37" font-size="18" text-anchor="middle">⚡</text>
-          <text x="35" y="58" font-size="9" text-anchor="middle" fill="#94a3b8" font-weight="bold">GROWATT</text>
+          <text x="35" y="58" font-size="9" text-anchor="middle" fill="#94a3b8" font-weight="bold" letter-spacing="0.5">GROWATT</text>
         </g>
 
-        <!-- 3. Аккумулятор (аккуратный модуль под инвертором) -->
+        <!-- 3. Аккумулятор (модуль под инвертором) -->
         <g transform="translate(145, 89)">
-          <rect x="0" y="0" width="70" height="22" rx="6" fill="#0f172a" stroke="#22c55e" stroke-width="1.5" />
-          <rect x="4" y="4" width="50" height="14" rx="3" fill="#22c55e" opacity="0.2" />
-          <rect id="battery-level-bar" x="4" y="4" width="25" height="14" rx="3" fill="#22c55e" />
+          <rect x="0" y="0" width="70" height="22" rx="7" fill="#070913" stroke="#22c55e" stroke-width="1.5" />
+          <rect x="4" y="4" width="50" height="14" rx="4" fill="#22c55e" opacity="0.15" />
+          <rect id="battery-level-bar" x="4" y="4" width="25" height="14" rx="4" fill="#22c55e" />
           <text x="61" y="15" font-size="10" fill="#22c55e" font-weight="bold">🔋</text>
         </g>
 
         <!-- 4. Иконка Дом (Квартира) -->
         <g transform="translate(295, 25)">
-          <rect x="0" y="0" width="40" height="50" rx="10" fill="#141b2d" stroke="#334155" stroke-width="1.5" />
-          <text x="20" y="32" font-size="22" text-anchor="middle">🏠</text>
+          <rect x="0" y="0" width="40" height="50" rx="12" fill="#141b2d" stroke="#334155" stroke-width="1.5" />
+          <text x="20" y="32" font-size="24" text-anchor="middle">🏠</text>
         </g>
       </svg>
     </div>
@@ -372,8 +407,8 @@
       <span>24:00</span>
     </div>
     <div class="timeline-legend">
-      <div class="legend-item"><div class="dot" style="background:var(--accent-green)"></div> Світло є</div>
-      <div class="legend-item"><div class="dot" style="background:var(--accent-orange)"></div> Світла немає</div>
+      <div class="legend-item"><div class="dot" style="color:var(--accent-green); background:var(--accent-green)"></div> Світло є</div>
+      <div class="legend-item"><div class="dot" style="color:var(--accent-orange); background:var(--accent-orange)"></div> Світла немає</div>
     </div>
   </div>
 
@@ -420,7 +455,6 @@
           const dischargeMode = document.getElementById('discharge-mode');
           const batteryBar = document.getElementById('battery-level-bar');
 
-          // Обновляем текст и шкалу аккумулятора на схеме (максимальная ширина шкалы = 50px)
           document.getElementById('battery-soc-top').innerText = soc + '%';
           document.getElementById('battery-kwh').innerText = approxKwh + ' кВт·ч';
           document.getElementById('load-power-top').innerText = loadKw + ' кВт';

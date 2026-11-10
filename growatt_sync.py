@@ -1,4 +1,5 @@
 import requests
+import hashlib
 from supabase import create_client
 
 SUPABASE_URL = "https://nzpfbvrbwmxhhpajgyjj.supabase.co"
@@ -10,33 +11,52 @@ DATALOGGER_SN = "HAQ1G5H24S"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def get_md5(password):
+    return hashlib.md5(password.encode('utf-8')).hexdigest()
+
 def fetch_and_push():
     session = requests.Session()
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-        "Referer": "https://server.growatt.com/login"
+        "Content-Type": "application/x-www-form-urlencoded"
     })
 
-    try:
-        # 1. Авторизация (передаем пароль в чистом виде)
-        login_url = "https://server.growatt.com/login"
+    # Список возможных серверов Growatt (в зависимости от региона)
+    servers = [
+        "https://server.growatt.com",
+        "https://server-api.growatt.com"
+    ]
+
+    login_data = None
+    active_server = None
+
+    for server in servers:
+        login_url = f"{server}/login"
         payload = {
             "account": GROWATT_USER,
-            "password": GROWATT_PASS,
+            "password": get_md5(GROWATT_PASS),
             "validateCode": ""
         }
-        
-        res = session.post(login_url, data=payload, timeout=15)
-        login_data = res.json()
-        
-        if login_data.get("result") != 1:
-            print(f"❌ Ошибка входа Growatt: {login_data}")
-            return
-            
+        try:
+            res = session.post(login_url, data=payload, timeout=10)
+            data = res.json()
+            if data.get("result") == 1:
+                login_data = data
+                active_server = server
+                print(f"✅ Успешный вход через сервер: {server}")
+                break
+        except Exception:
+            continue
+
+    if not login_data:
+        print("❌ Ошибка входа Growatt: Не удалось авторизоваться ни на одном сервере. Проверьте правильность логина и пароля.")
+        return
+
+    try:
         user_id = login_data.get("userId")
         
-        # 2. Получение данных инвертора по даталоггеру
-        device_url = f"https://server.growatt.com/panel/datalogger/getDataloggerInfo?dataloggerSn={DATALOGGER_SN}"
+        # Запрос информации по даталоггеру
+        device_url = f"{active_server}/panel/datalogger/getDataloggerInfo?dataloggerSn={DATALOGGER_SN}"
         dev_res = session.get(device_url, timeout=15)
         dev_data = dev_res.json()
         
@@ -46,7 +66,7 @@ def fetch_and_push():
         battery_soc = int(float(obj.get("batterySoc", obj.get("capacity", 0))))
         load_power = int(float(obj.get("loadPower", obj.get("pac", 0))))
 
-        # 3. Запись в Supabase
+        # Отправка в Supabase
         supabase.table("power_logs").insert({
             "grid_status": grid_status,
             "battery_soc": battery_soc,
@@ -56,7 +76,7 @@ def fetch_and_push():
         print(f"✅ Успешно синхронизировано: Сеть={grid_status}, АКБ={battery_soc}%, Нагрузка={load_power}W")
 
     except Exception as e:
-        print(f"❌ Ошибка выполнения: {e}")
+        print(f"❌ Ошибка обработки данных: {e}")
 
 if __name__ == "__main__":
     fetch_and_push()

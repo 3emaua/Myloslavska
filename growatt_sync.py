@@ -15,15 +15,14 @@ SUPABASE_KEY = "sb_publishable_htg_8lgoGKWP7Dx7eVlhDg_eLnr3Y10"
 GROWATT_API = "https://openapi.growatt.com"
 GROWATT_TOKEN = "kh3w9600ko1723x05n6146290m44492l"
 
-TELEGRAM_BOT_TOKEN = "9238668431:AAFnpFKNMnTLAjV6lE0tSxLdhBuMBalyxLs"
+# Вставьте сюда токен ВАШЕГО Telegram-бота и ВАШ Chat ID
+TELEGRAM_BOT_TOKEN = "ВАШ_ТОКЕН_БОТА_ЗДЕСЬ"
 TELEGRAM_CHAT_IDS = [
-    "414695641",
-    "593555491"
+    "ВАШ_CHAT_ID_ЗДЕСЬ"
 ]
 
 DEVICE_TYPE = "storage"
-DEVICE_SN = "UYN9G5N141"
-  # Твой актуальный серийник даталоггера
+DEVICE_SN = "UYN9G5N141"  # Серийник вашего инвертора
 
 KYIV = ZoneInfo("Europe/Kyiv")
 STATE_FILE = Path("power_state.json")
@@ -92,7 +91,6 @@ def get_growatt_data():
     )
     
     if device is None:
-        # Если в массиве storage не нашлось по serialNum, берем первый элемент
         if devices:
             device = devices[0]
         else:
@@ -169,9 +167,9 @@ def format_duration(start_time, end_time):
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
     if hours > 0:
-        return f"{hours} ч {minutes} мин"
+        return f"{hours} год {minutes} хв"
     if minutes > 0:
-        return f"{minutes} мин {seconds} сек"
+        return f"{minutes} хв {seconds} сек"
     return f"{seconds} сек"
 
 # =========================
@@ -186,41 +184,18 @@ def make_report(data, grid):
     grid_voltage = data.get("vGrid")
     
     if grid:
-        grid_text = (
-            "🟢 ПЯТНИЦА\n\n"
-            "Вячеслав, ДТЭК вернул питание. 💡⚡\n\n"
-            "Сеть восстановлена.\n\n"
-            "Запускаю протокол «HOME RETURN»…\n"
-            "⏳ Переключение на питание от сети…\n\n"
-            "🔌 Питание от ДТЭК восстановлено.\n"
-            "🔋 Резервная система отключена.\n\n"
-            "Квартира снова работает от сети.\n"
-            "Все основные системы работают штатно. ✅\n\n"
-            "Я продолжаю наблюдение. 👀"
-        )
+        grid_text = "🟢 Мережа відновлена. Живлення від міста ⚡"
         battery_mode = "ПИТАНИЕ ОТ СЕТИ ⚡"
     else:
-        grid_text = (
-            "🔴 ПЯТНИЦА\n\n"
-            "Вячеслав, ДТЭК снова решил проверить наш запас энергии. ⚡\n\n"
-            "Я уже всё предусмотрела.\n\n"
-            "Запускаю протокол «GROWATT»…\n"
-            "⏳ Инициализация резервной системы…\n\n"
-            "🔋 Резервное питание активировано.\n\n"
-            "Квартира переведена на питание от батареи.\n"
-            "Все основные системы работают штатно. ✅\n\n"
-            "Я продолжаю наблюдение. 👀\n"
-            "Как только ДТЭК вернёт питание — я сообщу вам. 💡"
-        )
+        grid_text = "🔴 Світло зникло! Перемикання на резерв (АКБ) 🔋"
         battery_mode = "РАБОТА ОТ РЕЗЕРВНОГО ПИТАНИЯ 🔋"
 
     return (
-        "🗣️ПЯТНИЦА — СОСТОЯНИЕ КВАРТИРЫ\n\n"
+        "🗣️ **МОНИТОРИНГ GROWATT**\n\n"
         f"{grid_text}\n\n"
         f"🏠 Потребление квартиры: {watts(apartment_power)}\n"
         f"🔋 Заряд батареи: {percent(battery_soc)}\n"
         f"⚡ Отдача инвертора: {watts(inverter_power)}\n"
-        f"🤖ПЯТНИЦА,БАТАРЕЯ: {battery_mode}\n"
         f"🏡 Напряжение выхода: {voltage(output_voltage)}\n"
         f"⚡ Напряжение сети: {voltage(grid_voltage)}\n\n"
         f"🕒 {now_kyiv().strftime('%d.%m.%Y %H:%M:%S')}"
@@ -231,11 +206,15 @@ def push_to_supabase(grid, data):
         grid_status = bool(grid)
         battery_soc = int(float(data.get("bmsSoc", 0) or 0))
         load_power = int(float(data.get("outPutPower", 0) or 0))
+        grid_voltage = float(data.get("vGrid", 0) or 0)
+        discharge_power = round(load_power / 1000, 2) # в кВт для нового интерфейса
         
         supabase.table("power_logs").insert({
             "grid_status": grid_status,
             "battery_soc": battery_soc,
-            "load_power": load_power
+            "load_power": load_power,
+            "grid_voltage": grid_voltage,
+            "discharge_power": discharge_power
         }).execute()
         print("✅ Данные успешно записаны в Supabase.")
     except Exception as e:
@@ -270,10 +249,10 @@ def check_power():
     if previous is True and grid is False:
         state["power_off_time"] = current_time.isoformat()
         event = (
-            "🔴 ДТЄК ВКРАВ СВІТЛО!\n\n"
-            f"🕒 Время отключения: {current_time.strftime('%d.%m.%Y %H:%M:%S')}"
+            "🔴 **СВІТЛО ЗНИКЛО!** ❌⚡\n\n"
+            f"🕒 Час зникнення: {current_time.strftime('%d.%m.%Y %H:%M:%S')}"
         )
-        print("🔴 ПІ-ПІ-ПІ ЗАФІКСОВАНО КРАДІЖКА СВІТЛА:", current_time)
+        print("🔴 СВІТЛО ЗНИКЛО:", current_time)
 
     elif previous is False and grid is True:
         power_off_time = state.get("power_off_time")
@@ -282,23 +261,23 @@ def check_power():
                 off_time = datetime.fromisoformat(power_off_time)
                 duration = format_duration(off_time, current_time)
                 event = (
-                    "🟢 ДА БУДЕТ СВЕТ !\n\n"
-                    f"🕒 Свет отключился: {off_time.strftime('%d.%m.%Y %H:%M:%S')}\n"
-                    f"🕒 Свет появился: {current_time.strftime('%d.%m.%Y %H:%M:%S')}\n\n"
-                    f"⏱ Света не было: {duration}"
+                    "🟢 **СВІТЛО З'ЯВИЛОСЯ!** 💡⚡\n\n"
+                    f"🕒 Зникло: {off_time.strftime('%d.%m.%Y %H:%M:%S')}\n"
+                    f"🕒 З'явилося: {current_time.strftime('%d.%m.%Y %H:%M:%S')}\n\n"
+                    f"⏱ Не було світла: {duration}"
                 )
             except (ValueError, TypeError):
                 event = (
-                    "🟢 ДА БУДЕТ СВЕТ!\n\n"
-                    f"🕒 Время появления: {current_time.strftime('%d.%m.%Y %H:%M:%S')}"
+                    "🟢 **СВІТЛО З'ЯВИЛОСЯ!** 💡⚡\n\n"
+                    f"🕒 Час появи: {current_time.strftime('%d.%m.%Y %H:%M:%S')}"
                 )
         else:
             event = (
-                "🟢 ДА БУДЕТ СВЕТ !\n\n"
-                f"🕒 Время появления: {current_time.strftime('%d.%m.%Y %H:%M:%S')}"
+                "🟢 **СВІТЛО З'ЯВИЛОСЯ!** 💡⚡\n\n"
+                f"🕒 Час появи: {current_time.strftime('%d.%m.%Y %H:%M:%S')}"
             )
         state.pop("power_off_time", None)
-        print("🟢 ПІ-ПІ-ПІ ПОВЕРННЯ СВІТЛА :", current_time)
+        print("🟢 СВІТЛО З'ЯВИЛОСЯ:", current_time)
 
     last_report = state.get("last_report")
     report_due = False

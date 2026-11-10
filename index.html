@@ -47,6 +47,40 @@
       font-size: 13px;
       color: var(--text-muted);
     }
+    
+    .top-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Кнопка обновления */
+    .refresh-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: background 0.2s;
+    }
+    .refresh-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .refresh-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      transition: transform 0.6s ease;
+    }
+    .refresh-btn.spinning svg {
+      transform: rotate(360deg);
+    }
+
     .online-badge {
       display: flex;
       align-items: center;
@@ -117,7 +151,6 @@
     .battery-pill h2 { margin: 0; font-size: 20px; color: var(--accent-green); font-weight: 800; letter-spacing: -0.5px; }
     .battery-pill span { font-size: 10px; color: var(--text-muted); }
 
-    /* SVG Схема с анимированными потоками */
     .schema-svg-container {
       position: relative;
       width: 100%;
@@ -267,9 +300,15 @@
       <h1>Моя станція</h1>
       <p>Growatt Energy System</p>
     </div>
-    <div class="online-badge">
-      <div class="online-dot"></div>
-      Онлайн
+    <div class="top-right-actions">
+      <!-- Кнопка принудительного обновления -->
+      <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()" title="Оновити дані">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      </button>
+      <div class="online-badge">
+        <div class="online-dot"></div>
+        Онлайн
+      </div>
     </div>
   </div>
 
@@ -291,7 +330,7 @@
       </div>
     </div>
 
-    <!-- Ультрасовременная схема с анимированными потоками от ЛЭП/АКБ к большой квартире -->
+    <!-- Схема -->
     <div class="schema-svg-container">
       <svg viewBox="0 0 360 135" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -305,33 +344,26 @@
           </filter>
         </defs>
 
-        <!-- Линия 1: ЛЭП (Город) -> Инвертор -->
         <path d="M 65 45 L 145 45" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
         <path id="path-grid-flow" d="M 65 45 L 145 45" class="flow-line" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none" filter="url(#glow-green)" visibility="hidden" />
         
-        <!-- Крестик обрыва сети -->
         <g id="grid-cross-group" transform="translate(105, 45)">
           <circle cx="0" cy="0" r="11" fill="#ef4444" opacity="0.9" />
           <text x="0" y="4" font-size="11" text-anchor="middle" fill="#fff" font-weight="bold">✕</text>
         </g>
 
-        <!-- Линия 2: Инвертор -> Большая квартира (Дом) -->
         <path d="M 215 45 L 290 45" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
         <path id="path-house-flow" d="M 215 45 L 290 45" class="flow-line" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" fill="none" filter="url(#glow-orange)" />
 
-        <!-- Линия 3: Анимированная стрелка/поток от АКБ (снизу) к инвертору -->
         <path d="M 180 95 L 180 75" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none" />
         <path id="path-bat-flow" d="M 180 95 L 180 75" class="flow-line" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" fill="none" filter="url(#glow-orange)" />
-        <!-- Стрелочка вверх -->
         <polygon id="bat-arrow" points="176,77 184,77 180,71" fill="#f59e0b" />
 
-        <!-- 1. Иконка ЛЭП (Город) -->
         <g transform="translate(25, 20)">
           <rect x="0" y="0" width="40" height="50" rx="12" fill="#141b2d" stroke="#334155" stroke-width="1.5" />
           <text x="20" y="31" font-size="22" text-anchor="middle">🗼</text>
         </g>
 
-        <!-- 2. Инвертор Growatt (Центр) -->
         <g transform="translate(145, 12)">
           <rect x="0" y="0" width="70" height="66" rx="14" fill="#141b2d" stroke="#f59e0b" stroke-width="2.5" />
           <circle cx="35" cy="30" r="15" fill="#0b0f19" stroke="#f59e0b" stroke-width="1.5" />
@@ -339,7 +371,6 @@
           <text x="35" y="56" font-size="8" text-anchor="middle" fill="#94a3b8" font-weight="bold" letter-spacing="0.5">GROWATT</text>
         </g>
 
-        <!-- 3. Аккумулятор под инвертором -->
         <g transform="translate(135, 95)">
           <rect x="0" y="0" width="90" height="26" rx="8" fill="#070913" stroke="#22c55e" stroke-width="1.5" />
           <rect x="6" y="5" width="60" height="16" rx="4" fill="#22c55e" opacity="0.15" />
@@ -347,7 +378,6 @@
           <text x="78" y="18" font-size="11" fill="#22c55e" font-weight="bold">🔋 АКБ</text>
         </g>
 
-        <!-- 4. УВЕЛИЧЕННАЯ БОЛЬШАЯ КВАРТИРА (Дом справа) -->
         <g transform="translate(285, 12)">
           <rect x="0" y="0" width="55" height="66" rx="14" fill="#141b2d" stroke="#334155" stroke-width="2" />
           <text x="27.5" y="34" font-size="28" text-anchor="middle">🏢</text>
@@ -457,7 +487,6 @@
           document.getElementById('load-power-top').innerText = loadKw + ' кВт';
           document.getElementById('load-power-bot').innerText = loadKw + ' кВт';
           
-          // Максимальная ширина шкалы батарейки на схеме = 60px
           batteryBar.setAttribute('width', Math.max(6, (soc / 100) * 60));
 
           const gridV = last.grid_voltage !== null && last.grid_voltage !== undefined ? last.grid_voltage : (hasGrid ? 230 : 0);
@@ -467,7 +496,6 @@
           dischargeVal.innerText = dischargeKw + ' кВт';
 
           if (hasGrid) {
-            // СЕТЬ ЕСТЬ: поток идет от ЛЭП в инвертор и дальше в квартиру (зеленый)
             banner.className = "status-banner online";
             bannerTitle.innerText = "Мережа активна";
             bannerSub.innerText = "Живлення від міської мережі";
@@ -484,7 +512,6 @@
             gridStatusVal.style.color = "var(--accent-green)";
             dischargeMode.innerText = "Споживання / Заряд АКБ";
           } else {
-            // СВЕТА НЕТ: сеть обрвана, поток идет от АКБ снизу в инвертор и в квартиру (помаранчевий)
             banner.className = "status-banner offline";
             bannerTitle.innerText = "Світла немає";
             bannerSub.innerText = "Живлення від батареї";
@@ -505,6 +532,22 @@
       } catch (err) {
         console.error("Fetch error:", err);
       }
+    }
+
+    // Функция ручного обновления при клике на кнопку
+    async function manualRefresh() {
+      const btn = document.getElementById('refresh-btn');
+      btn.classList.add('spinning');
+      
+      if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+        Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+      }
+
+      await fetchLatestData();
+
+      setTimeout(() => {
+        btn.classList.remove('spinning');
+      }, 600);
     }
 
     fetchLatestData();

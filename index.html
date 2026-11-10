@@ -22,7 +22,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 12px 12px 80px 12px;
+      padding: 16px;
       margin: 0;
     }
 
@@ -65,7 +65,7 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 24px;
-      padding: 16px;
+      padding: 20px;
       margin-bottom: 16px;
       position: relative;
     }
@@ -74,36 +74,34 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      font-size: 13px;
+      margin-bottom: 16px;
     }
     .metric-badge {
-      background: rgba(255,255,255,0.05);
-      padding: 6px 12px;
-      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 8px 14px;
+      border-radius: 14px;
       text-align: center;
     }
-    .metric-badge span { display: block; color: var(--text-muted); font-size: 11px; }
-    .metric-badge strong { font-size: 13px; }
+    .metric-badge span { display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 2px; }
+    .metric-badge strong { font-size: 14px; font-weight: 600; }
 
     /* Центральная батарея сверху */
     .battery-pill {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
       border-radius: 20px;
-      padding: 8px 16px;
+      padding: 8px 20px;
       text-align: center;
-      width: fit-content;
-      margin: 0 auto 12px auto;
     }
-    .battery-pill h2 { margin: 0; font-size: 20px; color: var(--accent-green); }
+    .battery-pill h2 { margin: 0; font-size: 22px; color: var(--accent-green); font-weight: 700; }
     .battery-pill span { font-size: 11px; color: var(--text-muted); }
 
     /* Графика схемы (SVG) */
     .schema-svg-container {
       position: relative;
       width: 100%;
-      height: 130px;
+      height: 120px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -120,13 +118,13 @@
 
     /* Плашка разряда снизу схемы */
     .discharge-pill {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
       border-radius: 16px;
-      padding: 8px;
+      padding: 8px 16px;
       text-align: center;
-      width: 140px;
-      margin: 12px auto 0 auto;
+      width: 150px;
+      margin: 14px auto 0 auto;
     }
     .discharge-pill strong { color: var(--accent-green); font-size: 14px; display: block; }
     .discharge-pill span { font-size: 11px; color: var(--text-muted); }
@@ -134,65 +132,79 @@
     /* Главный статус-баннер */
     .status-banner {
       border-radius: 20px;
-      padding: 16px;
+      padding: 16px 20px;
       text-align: center;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      justify-content: flex-start;
+      gap: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
     }
     .status-banner.offline {
-      background: linear-gradient(135deg, #451a03 0%, #7f1d1d 100%);
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: linear-gradient(135deg, #381305 0%, #691313 100%);
+      border: 1px solid rgba(239, 68, 68, 0.35);
     }
     .status-banner.online {
-      background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
-      border: 1px solid rgba(34, 197, 94, 0.4);
+      background: linear-gradient(135deg, #04382c 0%, #064e3b 100%);
+      border: 1px solid rgba(34, 197, 94, 0.35);
     }
-    .status-banner h3 { margin: 0; font-size: 18px; font-weight: 700; }
-    .status-banner p { margin: 2px 0 0 0; font-size: 13px; color: #cbd5e1; }
+    .status-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .status-banner.offline .status-icon { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    .status-banner.online .status-icon { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    
+    .status-text { text-align: left; }
+    .status-text h3 { margin: 0; font-size: 17px; font-weight: 700; }
+    .status-text p { margin: 2px 0 0 0; font-size: 13px; color: #cbd5e1; }
 
     /* Сетка трех показателей */
     .grid-3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 16px;
     }
     .stat-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 12px 8px;
+      border-radius: 18px;
+      padding: 14px 10px;
       text-align: center;
     }
-    .stat-card p { margin: 0 0 4px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-    .stat-card h4 { margin: 0; font-size: 16px; font-weight: 700; }
+    .stat-card p { margin: 0 0 6px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 500; }
+    .stat-card h4 { margin: 0; font-size: 17px; font-weight: 700; }
 
     /* Таймлайн графика света */
     .timeline-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 20px;
-      padding: 16px;
+      padding: 18px;
       margin-bottom: 20px;
     }
     .timeline-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       font-size: 13px;
+      font-weight: 600;
     }
     .timeline-bar {
-      height: 10px;
+      height: 12px;
       background: #1e293b;
-      border-radius: 5px;
-      position: relative;
+      border-radius: 6px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       display: flex;
     }
     .timeline-fill-green { background: var(--accent-green); height: 100%; }
@@ -206,41 +218,14 @@
     }
     .timeline-legend {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       justify-content: center;
-      margin-top: 10px;
-      font-size: 11px;
+      margin-top: 14px;
+      font-size: 12px;
       color: var(--text-muted);
     }
-    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; }
-
-    /* Нижняя навигация */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #0f172a;
-      border-top: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      z-index: 100;
-    }
-    .nav-item {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-    }
-    .nav-item.active { color: var(--accent-orange); }
-    .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
   </style>
 </head>
 <body>
@@ -261,11 +246,10 @@
   <div class="schema-card">
     <div class="top-metrics">
       <div class="metric-badge">
-        <span id="grid-label">Міська мережа</span>
+        <span>Міська мережа</span>
         <strong id="grid-voltage-val">-- V</strong>
       </div>
       
-      <!-- Батарея сверху -->
       <div class="battery-pill">
         <h2 id="battery-soc-top">--%</h2>
         <span id="battery-kwh">-- кВт·ч</span>
@@ -277,22 +261,22 @@
       </div>
     </div>
 
-    <!-- SVG Анимация схемы -->
+    <!-- SVG Схема потоков -->
     <div class="schema-svg-container">
       <svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
         <!-- Линия сеть - инвертор -->
-        <path id="path-grid-bg" d="M 60 50 L 130 50" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
-        <path id="path-grid-flow" d="M 60 50 L 130 50" class="flow-line" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none" visibility="hidden" />
-        <circle id="grid-cross" cx="95" cy="50" r="10" fill="#ef4444" visibility="visible" />
-        <text x="95" y="54" font-size="12" text-anchor="middle" fill="#fff">✕</text>
+        <path id="path-grid-bg" d="M 55 50 L 130 50" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path id="path-grid-flow" d="M 55 50 L 130 50" class="flow-line" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none" visibility="hidden" />
+        <circle id="grid-cross" cx="92" cy="50" r="10" fill="#ef4444" visibility="visible" />
+        <text x="92" y="54" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">✕</text>
 
         <!-- Линия инвертор - дом -->
-        <path d="M 170 50 L 260 50" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
-        <path d="M 170 50 L 260 50" class="flow-line" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M 170 50 L 255 50" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M 170 50 L 255 50" class="flow-line" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none" />
 
-        <!-- Иконка Столб / Сеть -->
-        <g transform="translate(30, 25)">
-          <text x="15" y="30" font-size="22" text-anchor="middle">⚡️</text>
+        <!-- Иконка Сеть -->
+        <g transform="translate(25, 25)">
+          <text x="15" y="30" font-size="24" text-anchor="middle">⚡️</text>
         </g>
 
         <!-- Инвертор Growatt -->
@@ -302,8 +286,8 @@
         </g>
 
         <!-- Дом -->
-        <g transform="translate(245, 25)">
-          <text x="20" y="30" font-size="24" text-anchor="middle">🏠</text>
+        <g transform="translate(240, 25)">
+          <text x="20" y="30" font-size="26" text-anchor="middle">🏠</text>
         </g>
       </svg>
     </div>
@@ -315,10 +299,10 @@
     </div>
   </div>
 
-  <!-- Статус-баннер (Світла немає / є) -->
+  <!-- Статус-баннер -->
   <div id="status-banner" class="status-banner offline">
-    <div style="font-size: 28px;">🔋</div>
-    <div style="text-align: left;">
+    <div class="status-icon">⚡</div>
+    <div class="status-text">
       <h3 id="banner-title">Світла немає</h3>
       <p id="banner-subtitle">Живлення від батареї</p>
     </div>
@@ -346,9 +330,8 @@
       <span>📅 Графік світла • <span id="current-date">Сьогодні</span></span>
     </div>
     <div class="timeline-bar">
-      <!-- Имитация таймлайна (можно заменить на реальные логи из базы позже) -->
-      <div class="timeline-fill-orange" style="width: 40%;"></div>
-      <div class="timeline-fill-green" style="width: 60%;"></div>
+      <div class="timeline-fill-orange" style="width: 45%;"></div>
+      <div class="timeline-fill-green" style="width: 55%;"></div>
     </div>
     <div class="timeline-hours">
       <span>00:00</span>
@@ -363,26 +346,6 @@
     </div>
   </div>
 
-  <!-- Нижняя панель навигации -->
-  <nav class="bottom-nav">
-    <button class="nav-item active">
-      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      Зараз
-    </button>
-    <button class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-      Графік
-    </button>
-    <button class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-      Історія
-    </button>
-    <button class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v4z"/></svg>
-      Станція
-    </button>
-  </nav>
-
   <script>
     const SUPABASE_URL = "https://nzpfbvrbwmxhhpajgyjj.supabase.co";
     const SUPABASE_KEY = "sb_publishable_htg_8lgoGKWP7Dx7eVlhDg_eLnr3Y10";
@@ -393,7 +356,6 @@
       Telegram.WebApp.expand();
     }
 
-    // Установка текущей даты в шапке графика
     const options = { day: 'numeric', month: 'numeric' };
     document.getElementById('current-date').innerText = "Сьогодні, " + new Date().toLocaleDateString('uk-UA', options);
 
@@ -414,9 +376,8 @@
           const soc = last.battery_soc || 0;
           const loadW = last.load_power || 0;
           const loadKw = (loadW / 1000).toFixed(2);
-          const approxKwh = (soc * 0.10).toFixed(2); // Пример пересчета емкости в кВт·ч (если батарея ~10кВтч)
+          const approxKwh = (soc * 0.10).toFixed(2);
 
-          // Элементы интерфейса
           const banner = document.getElementById('status-banner');
           const bannerTitle = document.getElementById('banner-title');
           const bannerSub = document.getElementById('banner-subtitle');
@@ -427,35 +388,35 @@
           const dischargeVal = document.getElementById('discharge-val');
           const dischargeMode = document.getElementById('discharge-mode');
 
-          // Заполняем данные батареи
           document.getElementById('battery-soc-top').innerText = soc + '%';
           document.getElementById('battery-kwh').innerText = approxKwh + ' кВт·ч';
           document.getElementById('load-power-top').innerText = loadKw + ' кВт';
           document.getElementById('load-power-bot').innerText = loadKw + ' кВт';
 
+          // Используем новые поля, если они заполнены, иначе берем логику из основных
+          const gridV = last.grid_voltage !== null && last.grid_voltage !== undefined ? last.grid_voltage : (hasGrid ? 230 : 0);
+          const dischargeKw = last.discharge_power !== null && last.discharge_power !== undefined ? last.discharge_power : loadKw;
+
+          gridVoltageVal.innerText = gridV + ' V';
+          dischargeVal.innerText = dischargeKw + ' кВт';
+
           if (hasGrid) {
-            // Сеть есть
             banner.className = "status-banner online";
             bannerTitle.innerText = "Мережа активна";
             bannerSub.innerText = "Живлення від міської мережі";
             gridFlow.setAttribute("visibility", "visible");
             gridCross.setAttribute("visibility", "hidden");
-            gridVoltageVal.innerText = "230 V";
-            gridStatusVal.innerText = "230 V";
+            gridStatusVal.innerText = gridV + ' V';
             gridStatusVal.style.color = "var(--accent-green)";
-            dischargeVal.innerText = loadKw + " кВт";
             dischargeMode.innerText = "Споживання / Заряд";
           } else {
-            // Сети нет (Остров)
             banner.className = "status-banner offline";
             bannerTitle.innerText = "Світла немає";
             bannerSub.innerText = "Живлення від батареї";
             gridFlow.setAttribute("visibility", "hidden");
             gridCross.setAttribute("visibility", "visible");
-            gridVoltageVal.innerText = "0 V";
             gridStatusVal.innerText = "0 V";
             gridStatusVal.style.color = "var(--accent-red)";
-            dischargeVal.innerText = loadKw + " кВт";
             dischargeMode.innerText = "Розряд батареї";
           }
         }

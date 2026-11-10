@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Growatt Live Monitor</title>
+  <title>Growatt Monitor</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -25,12 +25,41 @@
       margin: 0;
     }
 
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
     h2 {
-      margin: 0 0 16px 0;
+      margin: 0;
       font-size: 20px;
+    }
+
+    /* Кнопка ручного обновления */
+    .refresh-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-color);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .refresh-btn:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .refresh-btn.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .card {
@@ -40,14 +69,12 @@
       margin-bottom: 16px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
       position: relative;
-      overflow: hidden;
     }
 
-    /* Анимированный бейдж режима */
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       padding: 8px 16px;
       border-radius: 30px;
       font-weight: 700;
@@ -58,23 +85,16 @@
     }
     .status-badge.online { background: rgba(34, 197, 94, 0.15); color: var(--accent-green); border: 1px solid rgba(34, 197, 94, 0.3); }
     .status-badge.offline { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-badge.loading { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); border: 1px solid rgba(245, 158, 11, 0.3); }
 
     .pulse-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-    .online .pulse-dot { background: var(--accent-green); }
-    .offline .pulse-dot { background: var(--accent-red); }
-
-    @keyframes pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(var(--pulse-rgb), 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0); }
+      background: currentColor;
     }
 
-    /* SVG Анимация энергосхемы */
+    /* Анимация схемы */
     .energy-schema-container {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 16px;
@@ -84,9 +104,8 @@
       justify-content: center;
       align-items: center;
     }
-    svg { width: 100%; max-height: 140px; overflow: visible; }
+    svg { width: 100%; max-height: 120px; overflow: visible; }
 
-    /* Анимация потока частиц по линиям */
     .flow-line {
       stroke-dasharray: 6;
       animation: dash 1s linear infinite;
@@ -95,56 +114,56 @@
       to { stroke-dashoffset: -12; }
     }
 
-    /* Блок батареи */
     .battery-section { margin-top: 10px; }
     .battery-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
     .battery-header p { color: var(--hint-color); margin: 0; font-size: 13px; }
     .battery-header h1 { margin: 0; font-size: 32px; font-weight: 800; }
     
     .progress-bar { height: 14px; background: rgba(255, 255, 255, 0.08); border-radius: 7px; overflow: hidden; padding: 2px; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #22c55e); border-radius: 5px; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #22c55e); border-radius: 5px; width: 0%; transition: width 0.6s ease; }
 
-    /* Сетка метрик */
     .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .metric-box { background: var(--card-bg); padding: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .metric-box p { color: var(--hint-color); margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-box p { color: var(--hint-color); margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; }
     .metric-box h3 { margin: 0; font-size: 20px; font-weight: 700; }
 
-    .update-time { text-align: center; color: var(--hint-color); font-size: 11px; margin-top: 16px; }
+    .update-time { text-align: center; color: var(--hint-color); font-size: 12px; margin-top: 16px; }
   </style>
 </head>
 <body>
-  <h2>⚡️ Growatt Monitor</h2>
+  <div class="header-container">
+    <h2>⚡️ Growatt Monitor</h2>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchLatestData()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.73-5.73"/></svg>
+      Оновити
+    </button>
+  </div>
   
   <div class="card">
-    <div id="status" class="status-badge online">
+    <div id="status" class="status-badge loading">
       <div class="pulse-dot"></div>
-      <span id="status-text">Завантаження...</span>
+      <span id="status-text">Завантаження даних...</span>
     </div>
 
-    <!-- Интерактивная анимированная схема питания -->
+    <!-- Схема -->
     <div class="energy-schema-container">
       <svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
-        <!-- Линии связи -->
         <path id="grid-line" d="M 60 50 L 140 50" stroke="#334155" stroke-width="4" stroke-linecap="round" fill="none" />
         <path id="flow-path-grid" d="M 60 50 L 140 50" class="flow-line" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none" visibility="hidden" />
 
         <path d="M 180 50 L 260 50" stroke="#334155" stroke-width="4" stroke-linecap="round" fill="none" />
         <path d="M 180 50 L 260 50" class="flow-line" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" fill="none" />
 
-        <!-- Иконка Сети (Grid) -->
         <g transform="translate(30, 35)">
           <circle cx="20" cy="15" r="18" fill="#1e293b" stroke="#475569" stroke-width="2"/>
           <text x="20" y="21" font-size="16" text-anchor="middle">🏙️</text>
         </g>
 
-        <!-- Иконка Инвертора / Батареи (Inverter) -->
         <g transform="translate(140, 20)">
           <rect x="0" y="0" width="40" height="60" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
           <text x="20" y="35" font-size="20" text-anchor="middle">⚡</text>
         </g>
 
-        <!-- Иконка Дома (House) -->
         <g transform="translate(250, 35)">
           <circle cx="20" cy="15" r="18" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
           <text x="20" y="21" font-size="16" text-anchor="middle">🏠</text>
@@ -152,7 +171,6 @@
       </svg>
     </div>
 
-    <!-- Заряд аккумулятора -->
     <div class="battery-section">
       <div class="battery-header">
         <div>
@@ -161,7 +179,7 @@
         </div>
         <div style="text-align: right;">
           <p>Статус АКБ</p>
-          <span id="battery-mode" style="font-weight: 600; font-size: 14px; color: var(--accent-orange);">Очікування...</span>
+          <span id="battery-mode" style="font-weight: 600; font-size: 14px; color: var(--accent-orange);">Очікування</span>
         </div>
       </div>
       <div class="progress-bar">
@@ -170,7 +188,6 @@
     </div>
   </div>
 
-  <!-- Дополнительные метрики -->
   <div class="metrics-grid">
     <div class="metric-box">
       <p>Мережа AC</p>
@@ -182,7 +199,7 @@
     </div>
   </div>
 
-  <div class="update-time" id="update-time">Останнє оновлення: --:--:--</div>
+  <div class="update-time" id="update-time">Останнє оновлення: ніколи</div>
 
   <script>
     const SUPABASE_URL = "https://nzpfbvrbwmxhhpajgyjj.supabase.co";
@@ -195,6 +212,9 @@
     }
 
     async function fetchLatestData() {
+      const btn = document.getElementById('refresh-btn');
+      btn.classList.add('spinning');
+
       try {
         const { data, error } = await supabase
           .from('power_logs')
@@ -204,6 +224,7 @@
 
         if (error) {
           console.error("Supabase error:", error);
+          document.getElementById('status-text').innerText = "Помилка бази даних";
           return;
         }
 
@@ -216,8 +237,7 @@
           const gridLineBg = document.getElementById('grid-line');
           const batteryMode = document.getElementById('battery-mode');
 
-          // Логика состояния сети и анимации
-          if (last.grid_status) {
+          if (last.grid_status === true || last.grid_status === "true") {
             statusEl.className = "status-badge online";
             statusText.innerText = "⚡️ Мережа є (Місто)";
             gridState.innerText = "Активна";
@@ -235,27 +255,28 @@
             batteryMode.innerText = "Розряд / Резерв";
           }
 
-          // Батарея
           const soc = last.battery_soc || 0;
           document.getElementById('battery-soc').innerText = soc + ' %';
           document.getElementById('battery-bar').style.width = soc + '%';
-
-          // Нагрузка дома
           document.getElementById('load-power').innerText = (last.load_power || 0) + ' W';
 
-          // Время последнего обновления
           if (last.created_at) {
             const date = new Date(last.created_at);
-            document.getElementById('update-time').innerText = "Останнє оновлення: " + date.toLocaleTimeString('uk-UA');
+            document.getElementById('update-time').innerText = "Останнє оновлення: " + date.toLocaleTimeString('uk-UA') + " (" + date.toLocaleDateString('uk-UA') + ")";
           }
+        } else {
+          document.getElementById('status-text').innerText = "Немає даних у таблиці";
         }
       } catch (err) {
         console.error("Fetch error:", err);
+        document.getElementById('status-text').innerText = "Помилка з'єднання";
+      } finally {
+        setTimeout(() => btn.classList.remove('spinning'), 500);
       }
     }
 
     fetchLatestData();
-    setInterval(fetchLatestData, 15000); // Автообновление каждые 15 секунд
+    setInterval(fetchLatestData, 30000);
   </script>
 </body>
 </html>

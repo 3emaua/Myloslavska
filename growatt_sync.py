@@ -1,64 +1,58 @@
 import os
-import hashlib
-import requests
+from growattServer import GrowattApi
 from supabase import create_client
 
-# Настройки Supabase
 SUPABASE_URL = "https://nzpfbvrbwmxhhpajgyjj.supabase.co"
 SUPABASE_KEY = "sb_publishable_htg_8lgoGKWP7Dx7eVlhDg_eLnr3Y10"
 
-# Авторизация Growatt
 GROWATT_USER = "Viachealav"
 GROWATT_PASS = "Iloveyara2552"
 DATALOGGER_SN = "HAQ1G5H24S"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def get_md5(password):
-    return hashlib.md5(password.encode('utf-8')).hexdigest()
-
 def fetch_and_push():
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/javascript, */*; q=0.01"
-    })
-
     try:
-        # 1. Авторизация в Growatt (передаем хешированный MD5 пароль)
-        login_url = "https://server.growatt.com/login"
-        password_md5 = get_md5(GROWATT_PASS)
+        api = GrowattApi()
+        login_response = api.login(GROWATT_USER, GROWATT_PASS)
         
-        payload = {
-            "account": GROWATT_USER,
-            "password": password_md5,
-            "validateCode": ""
-        }
+        if not login_response or 'userId' not in login_response:
+            print(f"❌ Ошибка авторизации Growatt: {login_response}")
+            return
+            
+        user_id = login_response['userId']
+        plants_data = api.plant_list(user_id)
         
-        res = session.post(login_url, data=payload, timeout=15)
+        if not plants_data:
+            print("⚠️ Установки не найдены для данного аккаунта.")
+            return
+            
+        plant_id = plants_data[0]['plantId']
+        devices = api.device_list(plant_id)
         
-        # 2. Опрос информации по даталоггеру
-        info_url = f"https://server.growatt.com/panel/datalogger/getDataloggerInfo?dataloggerSn={DATALOGGER_SN}"
-        res_info = session.get(info_url, timeout=15)
-        data = res_info.json()
+        grid_status = True
+        battery_soc = 0
+        load_power = 0
         
-        obj = data.get("obj", {})
-        
-        grid_status = int(obj.get("status", 1)) == 1
-        battery_soc = int(obj.get("batterySoc", obj.get("capacity", 0)))
-        load_power = int(obj.get("loadPower", obj.get("pac", 0)))
+        if devices:
+            device_sn = devices[0].get('deviceSn')
+            device_type = devices[0].get('deviceType', 0)
+            det = api.device_detail(device_type, device_sn)
+            
+            battery_soc = int(float(det.get('batterySoc', det.get('capacity', 0))))
+            load_power = int(float(det.get('pLocalLoad', det.get('loadPower', 0))))
+            grid_status = int(det.get('status', 1)) == 1
 
-        # 3. Отправка данных в Supabase
         supabase.table("power_logs").insert({
             "grid_status": grid_status,
             "battery_soc": battery_soc,
             "load_power": load_power
         }).execute()
         
-        print(f"✅ Данные записаны: Сеть={grid_status}, АКБ={battery_soc}%, Нагрузка={load_power}W")
+        print(f"✅ Успешно синхронизировано: Сеть={grid_status}, АКБ={battery_soc}%, Нагрузка={load_power}W")
 
     except Exception as e:
-        print(f"❌ Ошибка выполнения: {e}")
+        print(f"❌ Критическая ошибка: {e}")
 
 if __name__ == "__main__":
     fetch_and_push()

@@ -1,12 +1,3 @@
-import sys
-import datetime as dt
-
-# Патч совместимости UTC для старых версий Python перед импортом growattServer
-if not hasattr(dt, "UTC"):
-    from datetime import timezone
-    dt.UTC = timezone.utc
-    sys.modules["datetime"] = dt
-
 from growattServer import GrowattApi
 from supabase import create_client
 

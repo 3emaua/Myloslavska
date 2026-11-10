@@ -2,8 +2,8 @@ name: Growatt Sync
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Запуск каждые 5 минут
-  workflow_dispatch:        # Возможность запустить вручную кнопкой
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   sync:

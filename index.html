@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Growatt Monitor</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { background-color: var(--tg-theme-bg-color, #121212); color: var(--tg-theme-text-color, #fff); font-family: sans-serif; padding: 16px; margin: 0; }
+    .card { background: var(--tg-theme-secondary-bg-color, #1e1e1e); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-bottom: 12px; }
+    .online { background: #2e7d32; color: #fff; }
+    .offline { background: #c62828; color: #fff; }
+    h1 { margin: 5px 0; font-size: 36px; }
+    p { color: #aaa; margin: 0; font-size: 14px; }
+    .progress-bar { height: 12px; background: #333; border-radius: 6px; overflow: hidden; margin-top: 12px; }
+    .progress-fill { height: 100%; background: #ff9800; width: 0%; transition: width 0.4s ease; }
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .metric-box { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <h2>⚡️ Growatt Monitor</h2>
+  
+  <div class="card">
+    <div id="status" class="status-badge">Завантаження...</div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div>
+        <p>Заряд акумулятора (SOC)</p>
+        <h1 id="battery-soc">-- %</h1>
+      </div>
+    </div>
+    <div class="progress-bar"><div id="battery-bar" class="progress-fill"></div></div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="card" style="margin-bottom:0;">
+      <p>Мережа AC</p>
+      <h3 id="grid-state" style="margin: 8px 0 0 0;">--</h3>
+    </div>
+    <div class="card" style="margin-bottom:0;">
+      <p>Навантаження будинку</p>
+      <h3 id="load-power" style="margin: 8px 0 0 0;">-- W</h3>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://nzpfbvrbwmxhhpajgyjj.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_htg_8lgoGKWP7Dx7eVlhDg_eLnr3Y10";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+
+    async function fetchLatestData() {
+      const { data, error } = await supabase
+        .from('power_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const last = data[0];
+        const statusEl = document.getElementById('status');
+        
+        if (last.grid_status) {
+          statusEl.innerText = "⚡️ Мережа є (Місто)";
+          statusEl.className = "status-badge online";
+          document.getElementById('grid-state').innerText = "Активна";
+        } else {
+          statusEl.innerText = "🔋 Робота від АКБ (Острів)";
+          statusEl.className = "status-badge offline";
+          document.getElementById('grid-state').innerText = "Відключено";
+        }
+
+        document.getElementById('battery-soc').innerText = last.battery_soc + ' %';
+        document.getElementById('battery-bar').style.width = last.battery_soc + '%';
+        document.getElementById('load-power').innerText = (last.load_power || 0) + ' W';
+      }
+    }
+
+    fetchLatestData();
+    setInterval(fetchLatestData, 30000);
+  </script>
+</body>
+</html>
